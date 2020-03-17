@@ -10,6 +10,7 @@ defmodule Exercises.EnumStreamsPractice do
   #  This function takes a path to a file and returns a stream of its lines.
   #  This is piped to Stream.map/2, which lazily removes the trailing newline
   #  character (\n) from each line.
+  @spec filtered_lines!(String.t) :: Stream.t
   defp filtered_lines!(path) do
     path
     |> File.stream!()
@@ -29,6 +30,7 @@ defmodule Exercises.EnumStreamsPractice do
     [57, 0, 2, 3, 5, 6, 4, 3, 5, 6, 4, 8, 9, 8, 10, 5, 6, 7, 5, 6, 3, 8, 9, 2, 3, 4,
     5, 6, 5, 5, 5, 10, 9, 11, 7, 8, 6, 8, 5, 5, 6, 7, 8, 5, 8, 9, 6, 5, 7, 8, ...]
   """
+  @spec lines_lengths!(String.t) :: [integer]
   def lines_lengths!(path) do
     path
     |> filtered_lines!()
@@ -53,6 +55,7 @@ defmodule Exercises.EnumStreamsPractice do
     See below for the contents of the one line in the file that is more than
     a single word (first, "header" line describing the file contents)
   """
+  @spec longest_line_length!(String.t) :: integer
   def longest_line_length!(path) do
     path
     |> filtered_lines!()
@@ -71,6 +74,7 @@ defmodule Exercises.EnumStreamsPractice do
     iex> Exercises.EnumStreamsPractice.longest_line!("/Users/adamphillips/Documents/Collins\ Scrabble\ Words\ (2015).txt")
     "Collins Scrabble Words (2015). 276,643 words. Words only."
   """
+  @spec longest_line!(String.t) :: String.t
   def longest_line!(path) do
     path
     |> filtered_lines!()
@@ -97,12 +101,14 @@ defmodule Exercises.EnumStreamsPractice do
     one word, there's a blank line - the 0 in the truncated list above. All
     other lines have exactly one word
   """
+  @spec words_per_line!(String.t) :: [integer]
   def words_per_line!(path) do
     path
     |> filtered_lines!()
     |> Enum.map(&word_count/1)
   end
 
+  @spec word_count(String.t) :: integer
   defp word_count(line) do
     line
     |> String.split()
