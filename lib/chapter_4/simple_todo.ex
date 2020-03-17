@@ -1,4 +1,4 @@
-defmodule TodoList do
+defmodule SimpleTodoList do
   @moduledoc """
     Module for handling the data abstraction involved in creating a Todo List
   """
