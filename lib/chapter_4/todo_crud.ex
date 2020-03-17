@@ -7,9 +7,21 @@ defmodule TodoList do
   defstruct auto_id: 1, entries: %{}
 
   @doc """
-    Create a new instance of the TodoList struct
+    Create a new instance of the TodoList struct. Update adds the ability to
+    utilize Enum.reduce/3 to add more than one entry when struct is created or
+    if no values are provided, an empty list is the default
+
+    The lambda here takes an entry and accumulator, passes both to add_entry/2
+    where the accumulator is a TodoList struct. The arguments are reversed
+    because Enum.reduce/3 calls the lambda first
   """
-  def new(), do: %TodoList{}
+  def new(entries \\ []) do
+    Enum.reduce(
+      entries,
+      %TodoList{},
+      &add_entry(&2, &1)
+    )
+  end
 
   @doc """
     Update the entry's `id` value with the value stored in the `auto_id` field
