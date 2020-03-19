@@ -1,4 +1,4 @@
-defmodule TodoList do
+defmodule TodoListCrud do
   @moduledoc """
     Module representing a CRUD version of a Todo List. The struct defines a
     default value for the `auto_id` and `entries` fields
@@ -7,18 +7,18 @@ defmodule TodoList do
   defstruct auto_id: 1, entries: %{}
 
   @doc """
-    Create a new instance of the TodoList struct. Update adds the ability to
+    Create a new instance of the TodoListCrud struct. Update adds the ability to
     utilize Enum.reduce/3 to add more than one entry when struct is created or
     if no values are provided, an empty list is the default
 
     The lambda here takes an entry and accumulator, passes both to add_entry/2
-    where the accumulator is a TodoList struct. The arguments are reversed
+    where the accumulator is a TodoListCrud struct. The arguments are reversed
     because Enum.reduce/3 calls the lambda first
   """
   def new(entries \\ []) do
     Enum.reduce(
       entries,
-      %TodoList{},
+      %TodoListCrud{},
       &add_entry(&2, &1)
     )
   end
@@ -32,16 +32,16 @@ defmodule TodoList do
     Once updated, add the entry to the entries collection, bound to the
     `new_entries` variable.
 
-    Lastly, add the new entry to the TodoList struct with the values from
+    Lastly, add the new entry to the TodoListCrud struct with the values from
     `new_entries`, and increment the `auto_id` field.
 
     Example call and return:
 
-    iex> todo_list = TodoList.new()
-              |> TodoList.add_entry(%{date: ~D[2020-03-19], title: "Dentist"})
-              |> TodoList.add_entry(%{date: ~D[2020-03-20], title: "Shopping"})
-              |> TodoList.add_entry(%{date: ~D[2020-03-19], title: "Movies"})
-    %TodoList{
+    iex> todo_list = TodoListCrud.new()
+              |> TodoListCrud.add_entry(%{date: ~D[2020-03-19], title: "Dentist"})
+              |> TodoListCrud.add_entry(%{date: ~D[2020-03-20], title: "Shopping"})
+              |> TodoListCrud.add_entry(%{date: ~D[2020-03-19], title: "Movies"})
+    %TodoListCrud{
       auto_id: 4,
       entries: %{
         1 => %{date: ~D[2020-03-19], id: 1, title: "Dentist"},
@@ -50,7 +50,7 @@ defmodule TodoList do
       }
     }
   """
-  @spec add_entry(TodoList.t, Map.t) :: TodoList.t
+  @spec add_entry(TodoListCrud.t, Map.t) :: TodoListCrud.t
   def add_entry(todo_list, entry) do
     entry = Map.put(
       entry,
@@ -64,7 +64,7 @@ defmodule TodoList do
       entry
     )
 
-    %TodoList{
+    %TodoListCrud{
       todo_list |
       entries: new_entries,
       auto_id: todo_list.auto_id + 1
@@ -72,21 +72,21 @@ defmodule TodoList do
   end
 
   @doc """
-    Accept a TodoList struct and a date. Starting with all entries for the
-    given date, use Stream.filter/2 to filter entries in that TodoList for only
+    Accept a TodoListCrud struct and a date. Starting with all entries for the
+    given date, use Stream.filter/2 to filter entries in that TodoListCrud for only
     those on the given date resulting in a collection of {id, entry} tuples for
     entries on the date. Then use Enum.map/2 to take the entry from the items
     in that collection
 
     Sample call and return using the bound variable shown in add_entry/2:
 
-    iex> TodoList.entries(todo_list, ~D[2020-03-19])
+    iex> TodoListCrud.entries(todo_list, ~D[2020-03-19])
     [
       %{date: ~D[2020-03-19], id: 1, title: "Dentist"},
       %{date: ~D[2020-03-19], id: 3, title: "Movies"}
     ]
   """
-  @spec entries(TodoList.t, Date.t) :: Map.t
+  @spec entries(TodoListCrud.t, Date.t) :: Map.t
   def entries(todo_list, date) do
     todo_list.entries
     |> Stream.filter(fn {_, entry} -> entry.date == date end)
@@ -102,7 +102,7 @@ defmodule TodoList do
     of the entry hasn't been changed and then perform the updating function on
     the desired entry and bind the result to a `new_entry` variable. Store the
     modified entry in the entries collection, and finally store that updated
-    collection in the TodoList instance and return the value
+    collection in the TodoListCrud instance and return the value
   """
   def update_entry(todo_list, entry_id, updater_function) do
     case Map.fetch(todo_list.entries, entry_id) do
@@ -113,7 +113,7 @@ defmodule TodoList do
         old_entry_id = old_entry.id
         new_entry = %{id: ^old_entry_id} = updater_function.(old_entry)
         new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
-        %TodoList{todo_list | entries: new_entries}
+        %TodoListCrud{todo_list | entries: new_entries}
     end
   end
 
@@ -127,9 +127,9 @@ defmodule TodoList do
 
   @doc """
     Delete the entry from a Todo List with the given ID and return the updated
-    TodoList struct
+    TodoListCrud struct
   """
   def delete_entry(todo_list, entry_id) do
-    %TodoList{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
+    %TodoListCrud{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
   end
 end
