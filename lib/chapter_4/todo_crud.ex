@@ -132,4 +132,54 @@ defmodule TodoListCrud do
   def delete_entry(todo_list, entry_id) do
     %TodoListCrud{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
   end
+
+  @doc """
+    Implement the Collectable protocol to make the Todo list collectable, and
+    able to be a target for a comprehension. Sample call and results from iEx
+    where a struct is created and populated, then targeted by the `for`
+    comprehension and repeatedly add elements from the `entries` list
+
+      iex(1)> entries = [
+          %{date: ~D[2020-03-19], title: "Dentist"},
+          %{date: ~D[2020-03-20], title: "Shopping"},
+          %{date: ~D[2020-03-19], title: "Movies"}
+        ]
+
+      [
+        %{date: ~D[2020-03-19], title: "Dentist"},
+        %{date: ~D[2020-03-20], title: "Shopping"},
+        %{date: ~D[2020-03-19], title: "Movies"}
+      ]
+
+      iex(2)> for entry <- entries, into: TodoListCrud.new(), do: entry
+
+      %TodoListCrud{
+        auto_id: 4,
+        entries: %{
+          1 => %{date: ~D[2020-03-19], id: 1, title: "Dentist"},
+          2 => %{date: ~D[2020-03-20], id: 2, title: "Shopping"},
+          3 => %{date: ~D[2020-03-19], id: 3, title: "Movies"}
+        }
+      }
+
+    into/1 is called by generic code, like the comprehension here. The appender
+    lambda is implemented here (into_callback/2) and called repeatedly to
+    append each element to the Struct
+
+    The appender receives a todo list and an instruction hint. If it receives
+    {:cont, entry}, it adds another entry to the struct. :done causes the list
+    to be returned, and :halt means the operation has been cancelled and the
+    return is ignored.
+  """
+  defimpl Collectable, for: TodoListCrud do
+    def into(original) do
+      {original, &into_callback/2}
+     end
+
+    defp into_callback(todo_list, {:cont, entry}) do
+      TodoListCrud.add_entry(todo_list, entry)
+    end
+    defp into_callback(todo_list, :done), do: todo_list
+    defp into_callback(todo_list, :halt), do: :ok
+  end
 end
