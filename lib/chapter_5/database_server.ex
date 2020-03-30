@@ -6,18 +6,20 @@ defmodule DatabaseServer do
     iex(1)> server_pid = DatabaseServer.start()
     iex(2)> DatabaseServer.run_async(server_pid, "query 1")
     iex(3)> DatabaseServer.get_result()
-    "query 1 result"
+    "Connection 323: query 1 result"
 
     iex(4)> DatabaseServer.run_async(server_pid, "query 2") iex(5)> DatabaseServer.get_result()
-    "query 2 result"
+    "Connection 323: query 2 result"
   """
 
   @doc """
-    Interface function called by clients to start the server process. This
-    creates a server process that runs forever.
+    Interface function called by clients to open the connection
   """
   def start do
-    spawn(&loop/0)
+    spawn(fn ->
+      connection = :rand.uniform(1000)
+      loop(connection)
+    end)
   end
 
   @doc """
@@ -44,18 +46,19 @@ defmodule DatabaseServer do
   end
 
   # This Implementation function runs in the server process and is called by
-  # the Interface function loop/0
-  defp loop do
+  # the Interface function loop/1, which keeps the state via the connection
+  defp loop(connection) do
     receive do
-      {:run_query, caller, query_def} ->
-        send(caller, {:query_result, run_query(query_def)})
+      {:run_query, from_pid, query_def} ->
+        query_result = run_query(connection, query_def)
+        send(from_pid, {:query_result, query_result})
     end
 
-    loop()
+    loop(connection)
   end
 
-  defp run_query(query_def) do
+  defp run_query(connection, query_def) do
     Process.sleep(2000)
-    "#{query_def} result"
+    "Connection #{connection}: #{query_def} result"
   end
 end
